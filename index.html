@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Budget Tracker — SPA</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="header-left">
+        <h1 id="appTitle">Budget Tracker</h1>
+        <div id="language-switcher">
+          <button data-lang="en" class="lang-btn">ENG</button>
+          <button data-lang="fi" class="lang-btn">FIN</button>
+        </div>
+      </div>
+      <nav class="nav">
+        <button data-view="dashboard" class="nav-btn active">Dashboard</button>
+        <button data-view="add" class="nav-btn">Add Expense</button>
+        <button data-view="history" class="nav-btn">History</button>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section id="view-dashboard" class="view">
+        <div class="card stats">
+          <div class="stat">
+            <div class="label" data-tr="dash_budget">Monthly Budget</div>
+            <div class="value" id="budgetAmount">—</div>
+          </div>
+          <div class="stat">
+            <div class="label" data-tr="dash_spent">Spent</div>
+            <div class="value" id="spentAmount">—</div>
+          </div>
+          <div class="stat">
+            <div class="label" data-tr="dash_remaining">Remaining</div>
+            <div class="value" id="remainingAmount">—</div>
+          </div>
+        </div>
+
+        <div class="card chart-card">
+          <h2 data-tr="dash_chart_title">Spending this month</h2>
+          <canvas id="spendChart" width="600" height="240"></canvas>
+        </div>
+
+        <div class="card quick-controls">
+          <label>
+            <span data-tr="dash_budget_label">Monthly budget:</span>
+            <input id="budgetInput" type="number" min="0" data-tr-ph="dash_budget_placeholder" placeholder="e.g. 1000" />
+          </label>
+          <button id="saveBudgetBtn" class="primary" data-tr="dash_save_btn">Save budget</button>
+        </div>
+      </section>
+
+      <section id="view-add" class="view hidden">
+        <div class="card">
+          <h2 data-tr="add_title">Add Expense</h2>
+          <form id="expenseForm">
+            <label>
+              <span data-tr="add_field_title">Title</span>
+              <input id="expTitle" type="text" required />
+            </label>
+
+            <label>
+              <span data-tr="add_field_amount">Amount</span>
+              <input id="expAmount" type="number" min="0.01" step="0.01" required />
+            </label>
+
+            <label>
+              <span data-tr="add_field_category">Category</span>
+              <select id="expCategory">
+                <option value="Other" data-tr="cat_other">Other</option>
+                <option value="Food" data-tr="cat_food">Food</option>
+                <option value="Transport" data-tr="cat_transport">Transport</option>
+                <option value="Housing" data-tr="cat_housing">Housing</option>
+                <option value="Entertainment" data-tr="cat_entertainment">Entertainment</option>
+                <option value="Car" data-tr="cat_car">Car</option>
+              </select>
+            </label>
+
+            <label>
+              <span data-tr="add_field_date">Date</span>
+              <input id="expDate" type="date" required />
+            </label>
+
+            <div class="form-actions">
+              <button type="submit" class="primary" data-tr="add_btn_submit">Add</button>
+              <button type="button" id="clearForm" data-tr="add_btn_clear">Clear</button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="view-history" class="view hidden">
+        <div class="card">
+          <h2 data-tr="history_title">History</h2>
+          <div class="filters">
+            <label>
+              <span data-tr="history_filter_month">Month:</span>
+              <input id="filterMonth" type="month" />
+            </label>
+            <label>
+              <span data-tr="history_filter_category">Category:</span>
+              <select id="filterCategory">
+                <option value="All" data-tr="history_all">All</option>
+                <option data-tr="cat_food">Food</option>
+                <option data-tr="cat_transport">Transport</option>
+                <option data-tr="cat_housing">Housing</option>
+                <option data-tr="cat_entertainment">Entertainment</option>
+                <option data-tr="cat_car">Car</option>
+                <option data-tr="cat_other">Other</option>
+              </select>
+            </label>
+            <button id="resetFilters" data-tr="history_reset">Reset</button>
+            <button id="downloadCsv" data-tr="history_csv">Download CSV</button>
+          </div>
+          
+
+
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+    </main>
+
+<footer class="footer">
+  <div class="currency-select">
+    <label for="currency" data-tr="footer_currency_label">Currency:</label>
+    <select id="currency">
+      <option value="EUR">EUR (€)</option>
+      <option value="USD">USD ($)</option>
+      <option value="GBP">GBP (£)</option>
+      <option value="JPY">JPY (¥)</option>
+    </select>
+  </div>
+  <small data-tr="footer_text">Simple Budget Tracker • Data stored locally in your browser</small>
+</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
