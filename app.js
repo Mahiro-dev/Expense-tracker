@@ -8,7 +8,8 @@ const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 const STORAGE_KEY = 'bt_expenses_v1';
 const STORAGE_BUDGET = 'bt_budget_v1';
 const STORAGE_CURRENCY = 'bt_currency_v1';
-const STORAGE_LANGUAGE = 'bt_language_v1';
+const STORAGE_LANGUAGE = 'bt_language_v1'; 
+
 let currency = loadCurrency();
 let currentLang = loadLanguage();
 
@@ -19,7 +20,7 @@ function saveCurrency(code){
   localStorage.setItem(STORAGE_CURRENCY, code);
 }
 function loadLanguage(){
-  return localStorage.getItem(STORAGE_LANGUAGE) || 'en';
+  return localStorage.getItem(STORAGE_LANGUAGE) || 'en'; // Default to English
 }
 function saveLanguage(code){
   localStorage.setItem(STORAGE_LANGUAGE, code);
@@ -142,6 +143,7 @@ function tr(key) {
 }
 /* ------- END TRANSLATION DATA ------- */
 
+
 /* ------- State ------- */
 let state = {
   expenses: loadExpenses(),
@@ -152,7 +154,7 @@ let state = {
 const navBtns = $$('.nav-btn');
 const views = $$('.view');
 
-//Language switcher setup
+// Language Switcher setup
 const langBtns = $$('#language-switcher .lang-btn');
 langBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -166,10 +168,10 @@ langBtns.forEach(btn => {
     applyTranslations();
   });
 });
-// Set initial active language button
+//Set initial active language button
 langBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
 
-// Currency Switcher setup
+//Currency switcher setup
 const currencySelect = $('#currency');
 currencySelect.value = currency;
 currencySelect.addEventListener('change', () => {
@@ -227,8 +229,48 @@ function loadBudget(){
   const b = localStorage.getItem(STORAGE_BUDGET);
   return b ? Number(b) : 0;
 }
+
+//Save the budget locally and send a POST request to an external service
 function saveBudget(){
+  // local save
   localStorage.setItem(STORAGE_BUDGET, String(state.budget));
+  
+  //HTTP POST -reguest
+  sendBudgetToServer(state.budget); 
+}
+
+//HTTP POST to jsonplaceholderiin
+async function sendBudgetToServer(budgetAmount) {
+  //doesn't send blank or 0 budget to server
+  if (!budgetAmount || budgetAmount <= 0) {
+    console.log('No empty or zero budget is sent to the server.');
+    return;
+  }
+  
+  try {
+    // TAMA ON PAKOLLINEN HTTP POST -PYYNTO
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: 'Monthly Budget Goal',
+        body: `User set budget goal to ${budgetAmount} ${currency}`,
+        userId: 1, 
+        date: new Date().toISOString()
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Budget saved to external API (Mock API). Response ID:', data.id);
+    } else {
+      console.error('Budget submission failed. Status:', response.status);
+    }
+  } catch (error) {
+    console.error('network connection error when sending budget.', error);
+  }
 }
 
 //Budget controls
@@ -236,7 +278,7 @@ budgetInput.value = state.budget || '';
 saveBudgetBtn.addEventListener('click', () => {
   const val = Number(budgetInput.value) || 0;
   state.budget = val;
-  saveBudget();
+  saveBudget(); //calls sendBudgetToServer()
   renderDashboard();
 });
 
@@ -247,7 +289,7 @@ expenseForm.addEventListener('submit', e => {
   const amount = Number(expAmount.value);
   const category = expCategory.value;
   const date = expDate.value || (new Date()).toISOString().slice(0,10);
-  if(!title || !amount || amount <= 0){ alert(tr('alert_valid_data')); return; }
+  if(!title || !amount || amount <= 0){ alert(tr('alert_valid_data')); return; } 
 
   const item = {
     id: Date.now().toString(),
@@ -276,7 +318,7 @@ function renderHistory(){
   }
 
   if(list.length === 0){
-    historyList.innerHTML = `<div class="card"><p style="color:var(--muted)">${tr('history_no_expenses')}</p></div>`; // UPDATED TEXT
+    historyList.innerHTML = `<div class="card"><p style="color:var(--muted)">${tr('history_no_expenses')}</p></div>`; 
     return;
   }
 
@@ -284,10 +326,13 @@ function renderHistory(){
   list.forEach(item => {
     const el = document.createElement('div');
     el.className = 'history-item';
+    const categoryKey = 'cat_' + item.category.toLowerCase();
+    const translatedCategory = tr(categoryKey);
+
     el.innerHTML = `
       <div class="h-left">
         <div>
-          <div class="h-title">${escapeHtml(item.title)} <span style="color:var(--muted);font-weight:600">· ${escapeHtml(tr('cat_'+item.category.toLowerCase()))}</span></div>
+          <div class="h-title">${escapeHtml(item.title)} <span style="color:var(--muted);font-weight:600">· ${escapeHtml(translatedCategory)}</span></div>
           <div class="h-meta">${item.date}</div>
         </div>
       </div>
@@ -308,7 +353,7 @@ function renderHistory(){
   historyList.querySelectorAll('[data-delete]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.delete;
-      if(!confirm(tr('history_delete_confirm'))) return;
+      if(!confirm(tr('history_delete_confirm'))) return; 
       state.expenses = state.expenses.filter(i => i.id !== id);
       saveExpenses();
       renderHistory();
@@ -316,13 +361,13 @@ function renderHistory(){
     });
   });
 
-  // edit handler
+  // edit handler (quick: prefills form and navigates to add)
   historyList.querySelectorAll('[data-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
       const it = state.expenses.find(x => x.id === id);
-      if(!it) return alert(tr('history_alert_not_found'));
-      if(!confirm(tr('history_edit_confirm'))) return;
+      if(!it) return alert(tr('history_alert_not_found')); 
+      if(!confirm(tr('history_edit_confirm'))) return; 
       state.expenses = state.expenses.filter(x => x.id !== id);
       saveExpenses();
       expTitle.value = it.title;
@@ -348,11 +393,17 @@ function renderDashboard(){
   const monthExpenses = state.expenses.filter(e => e.date.startsWith(monthStr));
   const spent = monthExpenses.reduce((s,i) => s + Number(i.amount), 0);
   const budget = Number(state.budget) || 0;
-  const remaining = Math.max(0, budget - spent);
+  const remaining = budget - spent;
 
   budgetAmountEl.textContent = budget ? formatCurrency(budget) : '—';
   spentAmountEl.textContent = formatCurrency(spent);
   remainingAmountEl.textContent = budget ? formatCurrency(remaining) : '—';
+  if (budget) {
+      remainingAmountEl.style.color = remaining < 0 ? 'var(--danger)' : 'var(--text)';
+  } else {
+      remainingAmountEl.style.color = 'var(--muted)';
+  }
+
 
   const days = {};
   monthExpenses.forEach(e => {
@@ -389,7 +440,6 @@ function drawBarChart(ctx, labels, data){
     const x = pad + i * (chartW / data.length) + ( (chartW/data.length) - barW)/2;
     const barH = (val / max) * chartH;
     const y = h - pad - barH;
-
     ctx.fillStyle = '#22c55e';
     ctx.fillRect(x, y, barW, barH);
   });
@@ -405,7 +455,7 @@ function drawBarChart(ctx, labels, data){
 //Utilities
 function formatCurrency(n){
   try {
-    return Number(n).toLocaleString('fi-FI', {
+    return Number(n).toLocaleString(currentLang === 'fi' ? 'fi-FI' : 'en-US', {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2
@@ -417,10 +467,12 @@ function formatCurrency(n){
 
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+
+// Function to apply all translations to the DOM
 function applyTranslations() {
   const currentT = translations[currentLang];
   
-  //static text elements (using data-tr attribute)
+  //Static text elements
   $$('[data-tr]').forEach(el => {
     const key = el.dataset.tr;
     if (el.tagName === 'OPTION' && el.parentElement.id === 'filterCategory') {
@@ -434,7 +486,7 @@ function applyTranslations() {
     }
   });
 
-  //placeholder text
+  //Placeholder text (using data-tr-ph attribute)
   $$('[data-tr-ph]').forEach(el => {
     const key = el.dataset.trPh;
     el.placeholder = currentT[key] || translations.en[key];
@@ -456,7 +508,7 @@ $('#downloadCsv').addEventListener('click', () => {
   const items = state.expenses.filter(e => e.date.startsWith(month));
 
   if (items.length === 0) {
-    alert(tr('alert_no_csv_data'));
+    alert(tr('alert_no_csv_data')); 
     return;
   }
 
