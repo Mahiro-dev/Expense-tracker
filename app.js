@@ -20,7 +20,7 @@ function saveCurrency(code){
   localStorage.setItem(STORAGE_CURRENCY, code);
 }
 function loadLanguage(){
-  return localStorage.getItem(STORAGE_LANGUAGE) || 'en'; // Default to English
+  return localStorage.getItem(STORAGE_LANGUAGE) || 'en';
 }
 function saveLanguage(code){
   localStorage.setItem(STORAGE_LANGUAGE, code);
@@ -29,13 +29,11 @@ function saveLanguage(code){
 /* ------- TRANSLATION DATA ------- */
 const translations = {
   en: {
-    // Nav/Header
     'app_title': 'Budget Tracker',
     'nav_dashboard': 'Dashboard',
     'nav_add': 'Add Expense',
     'nav_history': 'History',
-    
-    // Dashboard
+
     'dash_budget': 'Monthly Budget',
     'dash_spent': 'Spent',
     'dash_remaining': 'Remaining',
@@ -43,8 +41,7 @@ const translations = {
     'dash_budget_label': 'Monthly budget:',
     'dash_save_btn': 'Save budget',
     'dash_budget_placeholder': 'e.g. 1000',
-    
-    // Add Expense
+
     'add_title': 'Add Expense',
     'add_field_title': 'Title',
     'add_field_amount': 'Amount',
@@ -53,7 +50,6 @@ const translations = {
     'add_btn_submit': 'Add',
     'add_btn_clear': 'Clear',
 
-    // History
     'history_title': 'History',
     'history_filter_month': 'Month:',
     'history_filter_category': 'Category:',
@@ -65,7 +61,6 @@ const translations = {
     'history_edit_confirm': 'This will delete the item and open Add view prefilled for editing. Continue?',
     'history_alert_not_found': 'Not found',
 
-    // Categories
     'cat_other': 'Other',
     'cat_food': 'Food',
     'cat_transport': 'Transport',
@@ -73,23 +68,20 @@ const translations = {
     'cat_entertainment': 'Entertainment',
     'cat_car': 'Car',
 
-    // Alerts/Messages
     'alert_valid_data': 'Please enter valid title and amount',
     'alert_expense_added': 'Expense added',
     'alert_no_csv_data': 'No expenses for this month.',
-    
-    // Footer
+
     'footer_text': 'Simple Budget Tracker • Data stored locally in your browser',
     'footer_currency_label': 'Currency:',
   },
+
   fi: {
-    // Nav/Header
     'app_title': 'Budjettiseuraaja',
     'nav_dashboard': 'Kojelauta',
     'nav_add': 'Lisää kulu',
     'nav_history': 'Historia',
-    
-    // Dashboard
+
     'dash_budget': 'Kuukausibudjetti',
     'dash_spent': 'Kulutettu',
     'dash_remaining': 'Jäljellä',
@@ -97,8 +89,7 @@ const translations = {
     'dash_budget_label': 'Kuukausibudjetti:',
     'dash_save_btn': 'Tallenna budjetti',
     'dash_budget_placeholder': 'esim. 1000',
-    
-    // Add Expense
+
     'add_title': 'Lisää kulu',
     'add_field_title': 'Nimi',
     'add_field_amount': 'Summa',
@@ -107,7 +98,6 @@ const translations = {
     'add_btn_submit': 'Lisää',
     'add_btn_clear': 'Tyhjennä',
 
-    // History
     'history_title': 'Historia',
     'history_filter_month': 'Kuukausi:',
     'history_filter_category': 'Kategoria:',
@@ -119,7 +109,6 @@ const translations = {
     'history_edit_confirm': 'Tämä poistaa kulun ja esitäyttää Lisää kulu -näkymän. Jatka?',
     'history_alert_not_found': 'Ei löydy',
 
-    // Categories
     'cat_other': 'Muut',
     'cat_food': 'Ruoka',
     'cat_transport': 'Liikenne',
@@ -127,12 +116,10 @@ const translations = {
     'cat_entertainment': 'Viihde',
     'cat_car': 'Auto',
 
-    // Alerts/Messages
     'alert_valid_data': 'Anna kelvollinen nimi ja summa',
     'alert_expense_added': 'Kulu lisätty',
     'alert_no_csv_data': 'Ei kuluja tältä kuukaudelta.',
 
-    // Footer
     'footer_text': 'Yksinkertainen budjettiseuraaja • Tiedot tallennettu selaimeen',
     'footer_currency_label': 'Valuutta:',
   }
@@ -141,8 +128,6 @@ const translations = {
 function tr(key) {
   return translations[currentLang][key] || translations['en'][key] || `MISSING_KEY_${key}`;
 }
-/* ------- END TRANSLATION DATA ------- */
-
 
 /* ------- State ------- */
 let state = {
@@ -154,7 +139,6 @@ let state = {
 const navBtns = $$('.nav-btn');
 const views = $$('.view');
 
-// Language Switcher setup
 const langBtns = $$('#language-switcher .lang-btn');
 langBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -168,10 +152,8 @@ langBtns.forEach(btn => {
     applyTranslations();
   });
 });
-//Set initial active language button
 langBtns.forEach(b => b.classList.toggle('active', b.dataset.lang === currentLang));
 
-//Currency switcher setup
 const currencySelect = $('#currency');
 currencySelect.value = currency;
 currencySelect.addEventListener('change', () => {
@@ -212,7 +194,6 @@ function showView(name){
 }
 navBtns.forEach(btn => btn.addEventListener('click', () => showView(btn.dataset.view)));
 
-// Default route
 showView('dashboard');
 
 //Storage functions
@@ -230,47 +211,8 @@ function loadBudget(){
   return b ? Number(b) : 0;
 }
 
-//Save the budget locally and send a POST request to an external service
 function saveBudget(){
-  // local save
   localStorage.setItem(STORAGE_BUDGET, String(state.budget));
-  
-  //HTTP POST -reguest
-  sendBudgetToServer(state.budget); 
-}
-
-//HTTP POST to jsonplaceholderiin
-async function sendBudgetToServer(budgetAmount) {
-  //doesn't send blank or 0 budget to server
-  if (!budgetAmount || budgetAmount <= 0) {
-    console.log('No empty or zero budget is sent to the server.');
-    return;
-  }
-  
-  try {
-    // TAMA ON PAKOLLINEN HTTP POST -PYYNTO
-    const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        title: 'Monthly Budget Goal',
-        body: `User set budget goal to ${budgetAmount} ${currency}`,
-        userId: 1, 
-        date: new Date().toISOString()
-      })
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Budget saved to external API (Mock API). Response ID:', data.id);
-    } else {
-      console.error('Budget submission failed. Status:', response.status);
-    }
-  } catch (error) {
-    console.error('network connection error when sending budget.', error);
-  }
 }
 
 //Budget controls
@@ -278,7 +220,7 @@ budgetInput.value = state.budget || '';
 saveBudgetBtn.addEventListener('click', () => {
   const val = Number(budgetInput.value) || 0;
   state.budget = val;
-  saveBudget(); //calls sendBudgetToServer()
+  saveBudget();
   renderDashboard();
 });
 
@@ -306,7 +248,7 @@ clearFormBtn.addEventListener('click', () => expenseForm.reset());
 
 //History rendering & filters
 function renderHistory(){
-  const month = filterMonth.value; // 'YYYY-MM'
+  const month = filterMonth.value;
   const cat = filterCategory.value;
   let list = state.expenses.slice().sort((a,b) => b.id - a.id);
 
@@ -349,7 +291,6 @@ function renderHistory(){
     historyList.appendChild(el);
   });
 
-  // delete handler
   historyList.querySelectorAll('[data-delete]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.delete;
@@ -361,7 +302,6 @@ function renderHistory(){
     });
   });
 
-  // edit handler (quick: prefills form and navigates to add)
   historyList.querySelectorAll('[data-id]').forEach(btn => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.id;
@@ -387,9 +327,9 @@ resetFilters.addEventListener('click', () => {
   renderHistory();
 });
 
-//Dashboard rendering & simple chart
+//Dashboard rendering & chart
 function renderDashboard(){
-  const monthStr = (new Date()).toISOString().slice(0,7); // YYYY-MM
+  const monthStr = (new Date()).toISOString().slice(0,7);
   const monthExpenses = state.expenses.filter(e => e.date.startsWith(monthStr));
   const spent = monthExpenses.reduce((s,i) => s + Number(i.amount), 0);
   const budget = Number(state.budget) || 0;
@@ -398,12 +338,7 @@ function renderDashboard(){
   budgetAmountEl.textContent = budget ? formatCurrency(budget) : '—';
   spentAmountEl.textContent = formatCurrency(spent);
   remainingAmountEl.textContent = budget ? formatCurrency(remaining) : '—';
-  if (budget) {
-      remainingAmountEl.style.color = remaining < 0 ? 'var(--danger)' : 'var(--text)';
-  } else {
-      remainingAmountEl.style.color = 'var(--muted)';
-  }
-
+  remainingAmountEl.style.color = budget ? (remaining < 0 ? 'var(--danger)' : 'var(--text)') : 'var(--muted)';
 
   const days = {};
   monthExpenses.forEach(e => {
@@ -411,22 +346,22 @@ function renderDashboard(){
     days[d] = (days[d] || 0) + e.amount;
   });
 
-  // Prepare data for up to 31 days or only days in current month
   const now = new Date();
   const year = now.getFullYear();
   const monthIndex = now.getMonth();
   const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
   const labels = [];
   const data = [];
+
   for(let d=1; d<=daysInMonth; d++){
     const key = String(d).padStart(2,'0');
     labels.push(key);
     data.push(Number((days[key] || 0).toFixed(2)));
   }
+
   drawBarChart(ctx, labels, data);
 }
 
-//simple bar chart
 function drawBarChart(ctx, labels, data){
   const w = ctx.canvas.width;
   const h = ctx.canvas.height;
@@ -436,8 +371,9 @@ function drawBarChart(ctx, labels, data){
   const chartH = h - pad*2;
   const max = Math.max(...data, 10);
   const barW = Math.max(4, chartW / data.length * 0.8);
+
   data.forEach((val,i) => {
-    const x = pad + i * (chartW / data.length) + ( (chartW/data.length) - barW)/2;
+    const x = pad + i * (chartW / data.length) + ((chartW/data.length) - barW)/2;
     const barH = (val / max) * chartH;
     const y = h - pad - barH;
     ctx.fillStyle = '#22c55e';
@@ -452,7 +388,6 @@ function drawBarChart(ctx, labels, data){
   }
 }
 
-//Utilities
 function formatCurrency(n){
   try {
     return Number(n).toLocaleString(currentLang === 'fi' ? 'fi-FI' : 'en-US', {
@@ -465,14 +400,15 @@ function formatCurrency(n){
   }
 }
 
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
 
-
-// Function to apply all translations to the DOM
 function applyTranslations() {
   const currentT = translations[currentLang];
   
-  //Static text elements
   $$('[data-tr]').forEach(el => {
     const key = el.dataset.tr;
     if (el.tagName === 'OPTION' && el.parentElement.id === 'filterCategory') {
@@ -486,13 +422,11 @@ function applyTranslations() {
     }
   });
 
-  //Placeholder text (using data-tr-ph attribute)
   $$('[data-tr-ph]').forEach(el => {
     const key = el.dataset.trPh;
     el.placeholder = currentT[key] || translations.en[key];
   });
 
-  //Navigation buttons (which don't use data-tr to avoid conflict with active class logic)
   $$('.nav-btn[data-view="dashboard"]')[0].textContent = currentT.nav_dashboard;
   $$('.nav-btn[data-view="add"]')[0].textContent = currentT.nav_add;
   $$('.nav-btn[data-view="history"]')[0].textContent = currentT.nav_history;
@@ -502,7 +436,7 @@ function applyTranslations() {
   renderHistory();
 }
 
-//CSV Download
+//CSV Export
 $('#downloadCsv').addEventListener('click', () => {
   const month = filterMonth.value || new Date().toISOString().slice(0,7);
   const items = state.expenses.filter(e => e.date.startsWith(month));
@@ -512,13 +446,11 @@ $('#downloadCsv').addEventListener('click', () => {
     return;
   }
 
-  // Build CSV data
   let csv = "Title,Amount,Category,Date\n";
   items.forEach(e => {
     csv += `"${e.title}","${e.amount} ${currency}","${e.category}","${e.date}"\n`;
   });
 
-  // Trigger download
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

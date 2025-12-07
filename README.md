@@ -2,7 +2,7 @@
 
 open html or use website: https://rahatrack.com
 
-A simple, client-side Single Page Application (SPA) for tracking monthly expenses and managing a budget. All data is saved directly in the user's browser using localStorage. also makes a HTTP POST
+A simple, client-side Single Page Application (SPA) for tracking monthly expenses and managing a budget. All data is saved directly in the user's browser using localStorage. used to make a HTTP POST (course req)
 
 Features
 
